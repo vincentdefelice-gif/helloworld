@@ -44,6 +44,7 @@
             color: #333;
         }
 
+        input[type="email"],
         input[type="text"],
         input[type="password"] {
             width: 100%;
@@ -114,12 +115,12 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ username, password })
+                body: JSON.stringify({ email, password })
             })
             .then(response => {
                 if (response.ok) {
                     // Store logged in state
-                    sessionStorage.setItem('loggedInUser', username);
+                    sessionStorage.setItem('loggedInUser', email);
                     window.location.href = './welcome.html';
                 } else {
                     return response.json().then(data => {
