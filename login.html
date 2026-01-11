@@ -90,8 +90,8 @@
         <h1>Log In</h1>
         <form id="login-form">
             <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" required>
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" required>
             </div>
             <div class="form-group">
                 <label for="password">Password</label>
@@ -105,7 +105,7 @@
         document.getElementById('login-form').addEventListener('submit', function(event) {
             event.preventDefault();
             
-            const username = event.target.username.value;
+            const email = event.target.email.value;
             const password = event.target.password.value;
             const backendUrl = 'https://helloworld-mw9z.onrender.com';
 

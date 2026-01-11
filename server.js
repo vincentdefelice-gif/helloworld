@@ -26,11 +26,24 @@ const initializeDatabase = async () => {
         await client.query(`
             CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
-                username VARCHAR(255) UNIQUE NOT NULL,
+                email VARCHAR(255) UNIQUE NOT NULL,
                 password_hash VARCHAR(255) NOT NULL,
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
             );
         `);
+        // Migration: Rename 'username' column to 'email' if it exists
+        await client.query(`
+            DO $$ BEGIN
+                IF EXISTS (SELECT 1 FROM pg_attribute WHERE attrelid=(SELECT oid FROM pg_class WHERE relname='users') AND attname='username') THEN
+                    ALTER TABLE users RENAME COLUMN username TO email;
+                END IF;
+            END $$;
+        `).catch(err => {
+            // Ignore error if column doesn't exist or is already renamed
+            if (!err.message.includes('column "username" does not exist') && !err.message.includes('column "username" of relation "users" does not exist')) {
+                console.warn('Warning during column rename migration:', err.message);
+            }
+        });
         client.release();
         console.log('Database initialized successfully.');
     } catch (err) {
@@ -46,23 +59,24 @@ app.use(express.static(path.join(__dirname, '/')));
 
 // API endpoint for signing up
 app.post('/api/signup', async (req, res) => {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
     const saltRounds = 10;
 
-    if (!username || !password) {
-        return res.status(400).json({ message: 'Username and password are required.' });
+    // Basic email validation
+    if (!email || !password || !/\S+@\S+\.\S+/.test(email)) {
+        return res.status(400).json({ message: 'Valid email and password are required.' });
     }
 
     try {
         const hashedPassword = await bcrypt.hash(password, saltRounds);
         const result = await pool.query(
-            'INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id',
-            [username, hashedPassword]
+            'INSERT INTO users (email, password_hash) VALUES ($1, $2) RETURNING id',
+            [email, hashedPassword]
         );
         res.status(201).json({ message: 'User created successfully.', userId: result.rows[0].id });
     } catch (err) {
         if (err.code === '23505') { // Unique violation
-            return res.status(409).json({ message: 'Username already exists.' });
+            return res.status(409).json({ message: 'Email already registered.' });
         }
         console.error('Error signing up user:', err);
         res.status(500).json({ message: 'An error occurred during sign up.' });
@@ -71,18 +85,19 @@ app.post('/api/signup', async (req, res) => {
 
 // API endpoint for logging in
 app.post('/api/login', async (req, res) => {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
-    if (!username || !password) {
-        return res.status(400).json({ message: 'Username and password are required.' });
+    // Basic email validation
+    if (!email || !password || !/\S+@\S+\.\S+/.test(email)) {
+        return res.status(400).json({ message: 'Valid email and password are required.' });
     }
 
     try {
-        const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+        const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
         const user = result.rows[0];
 
         if (!user) {
-            return res.status(401).json({ message: 'Invalid username or password.' });
+            return res.status(401).json({ message: 'Invalid email or password.' });
         }
 
         const match = await bcrypt.compare(password, user.password_hash);
@@ -90,7 +105,7 @@ app.post('/api/login', async (req, res) => {
         if (match) {
             res.status(200).json({ message: 'Login successful.' });
         } else {
-            res.status(401).json({ message: 'Invalid username or password.' });
+            res.status(401).json({ message: 'Invalid email or password.' });
         }
     } catch (err) {
         console.error('Error logging in user:', err);
