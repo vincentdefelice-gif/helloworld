@@ -1,6 +1,7 @@
 // A meaningless comment to test deployment
 const express = require('express');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 const path = require('path');
 
 const app = express();
@@ -9,6 +10,7 @@ const PORT = process.env.PORT || 3000;
 // In-memory user store (replace with a database in a real application)
 const users = [];
 
+app.use(cors()); // Enable CORS for all routes
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, '/')));
 
