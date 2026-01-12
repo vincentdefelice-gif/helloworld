@@ -48,6 +48,50 @@
             background-color: #005ecb;
         }
 
+        .photo-gallery-title {
+            font-size: 2.5rem;
+            font-weight: 300;
+            letter-spacing: -0.04em;
+            margin-top: 40px;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        .photo-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .photo-item {
+            background-color: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .photo-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .photo-item img {
+            width: 100%;
+            height: 200px; /* Fixed height for uniformity */
+            object-fit: cover; /* Cover the area, cropping if necessary */
+            display: block;
+        }
+
+        .photo-item-caption {
+            padding: 15px;
+            font-size: 0.95rem;
+            color: #555;
+        }
+
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -58,11 +102,45 @@
                 transform: translateY(0);
             }
         }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            .photo-gallery-title {
+                font-size: 1.8rem;
+            }
+            .photo-gallery {
+                grid-template-columns: 1fr; /* Single column on smaller screens */
+            }
+            .photo-item img {
+                height: 180px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="main-content">
         <h1>hello again</h1>
+        <h2 class="photo-gallery-title">My Dog's Photo Gallery</h2>
+        <div class="photo-gallery">
+            <div class="photo-item">
+                <img src="https://via.placeholder.com/250/F5F5F7/555555?text=Dog+Photo+1" alt="Dog Photo 1">
+                <div class="photo-item-caption">Happy pup enjoying the sun.</div>
+            </div>
+            <div class="photo-item">
+                <img src="https://via.placeholder.com/250/F5F5F7/555555?text=Dog+Photo+2" alt="Dog Photo 2">
+                <div class="photo-item-caption">Playful moments in the park.</div>
+            </div>
+            <div class="photo-item">
+                <img src="https://via.placeholder.com/250/F5F5F7/555555?text=Dog+Photo+3" alt="Dog Photo 3">
+                <div class="photo-item-caption">Sleepy dog on the couch.</div>
+            </div>
+            <div class="photo-item">
+                <img src="https://via.placeholder.com/250/F5F5F7/555555?text=Dog+Photo+4" alt="Dog Photo 4">
+                <div class="photo-item-caption">Adventurous hike buddy.</div>
+            </div>
+        </div>
         <button id="logout-button" class="button">Log Out</button>
     </div>
 
